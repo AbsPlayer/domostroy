@@ -214,7 +214,7 @@ def parse_building(url):
                                                       "Цена м2": price_m2,
                                                       "Стоимость": cost,
                                                       "Этаж": iFloor}
-                            r += 1
+                                r += 1
                         r += 1
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
             if len(temp_page) > 1 and temp_page[1] == "disabled":
@@ -226,13 +226,16 @@ def parse_building(url):
 
 
 domain = "https://www.domostroydon.ru"
-cities = {}
-zhks = {}
-buildings = {}
-apartments = parse_building("https://www.domostroydon.ru/novostroyki/zhk-ekateriniskiy/dom-2a")
-buildings["Дом №2а"] = apartments
-zhks["ЖК Екатериниский"] = buildings
-cities["Ростов"] = zhks
+cities = parse_cities()
+for city, url_city in cities.items():
+    zhks = parse_zhks(url_city["url_city"])
+    for zhk, url_zhk in zhks.items():
+        buildings = parse_buildings(url_zhk)
+        for building, url_building in buildings.items():
+            apartments = parse_building(url_building)
+            buildings[building] = apartments
+        zhks[zhk] = buildings
+    cities[city] = zhks
 
 for city, city_data in cities.items():
     save_to_xlsx(city, city_data)
