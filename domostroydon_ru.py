@@ -32,7 +32,7 @@ def save_to_xlsx(city, dict_data):
                 ws.cell(row=row_, column=start_column + 4).value = apartments[apartment]["Цена м2"]
                 ws.cell(row=row_, column=start_column + 5).value = apartments[apartment]["Стоимость"]
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
-                row_ +=1
+                row_ += 1
     wb.save(filename)
 
 
@@ -40,21 +40,21 @@ def parse_cities():
 
     domain_cities = domain + "/novostroyki/rostovskaya-oblast/"
     cities = {}
-    cities = {"Азов": {"url_city": "azov"},
-              "Волгодонск": {"url_city": "volgodonsk"},
-              "Новочеркасск": {"url_city": "novocherkassk"},
-              "Таганрог": {"url_city": "taganrog"},
-              "Городской округ Азов": {"url_city": "gorodskoy-okrug-azov"},
-              "Городской округ Батайск": {"url_city": "gorodskoy-okrug-bataysk"},
-              "Азовский район": {"url_city": "azovskiy-rayon"},
-              "Городской округ Волгодонск": {"url_city": "gorodskoy-okrug-volgodonsk"},
-              "Аксайский район": {"url_city": "aksayskiy-rayon"},
-              "Мясниковский район": {"url_city": "myasnikovskiy-rayon"},
-              "Багаевский район": {"url_city": "bagaevskiy-rayon"},
-              "Городской округ Новочеркасск": {"url_city": "gorodskoy-okrug-novocherkassk"},
-              "Родионово-Несветайский район": {"url_city": "rodionovo-nesvetayskiy-rayon"},
-              "Городской округ Таганрог": {"url_city": "gorodskoy-okrug-taganrog"}
-              }
+    # cities = {"Азов": {"url_city": "azov"},
+    #           "Волгодонск": {"url_city": "volgodonsk"},
+    #           "Новочеркасск": {"url_city": "novocherkassk"},
+    #           "Таганрог": {"url_city": "taganrog"},
+    #           "Городской округ Азов": {"url_city": "gorodskoy-okrug-azov"},
+    #           "Городской округ Батайск": {"url_city": "gorodskoy-okrug-bataysk"},
+    #           "Азовский район": {"url_city": "azovskiy-rayon"},
+    #           "Городской округ Волгодонск": {"url_city": "gorodskoy-okrug-volgodonsk"},
+    #           "Аксайский район": {"url_city": "aksayskiy-rayon"},
+    #           "Мясниковский район": {"url_city": "myasnikovskiy-rayon"},
+    #           "Багаевский район": {"url_city": "bagaevskiy-rayon"},
+    #           "Городской округ Новочеркасск": {"url_city": "gorodskoy-okrug-novocherkassk"},
+    #           "Родионово-Несветайский район": {"url_city": "rodionovo-nesvetayskiy-rayon"},
+    #           "Городской округ Таганрог": {"url_city": "gorodskoy-okrug-taganrog"}
+    #           }
     cities_urls = {}
     cities_urls = {"Ростов": {"url_city": "https://www.domostroydon.ru/novostroyki"}}
     for city, url in cities.items():
@@ -140,16 +140,30 @@ def parse_building(url):
                 cost = int("".join(apartment.find(class_="flat-card__price").text.split()))
 
             if apartment.find(class_="flat-card__floor") is not None:
-                floor = apartment.find(class_="flat-card__floor").find(class_="key-value-table__value").text
+                floors = apartment.find(class_="flat-card__floor").find(class_="key-value-table__value").text
             else:
-                floor = ""
+                floors = ""
 
-            dict_apartments[r] = {"Кол-во комнат": qty_rooms,
-                                  "Общая площадь": total_square,
-                                  "Цена м2": price_m2,
-                                  "Стоимость": cost,
-                                  "Этаж": floor}
-            r += 1
+            for floor in floors.split(","):
+                iFloor = floor.strip()
+                if "-" not in floor:
+                    dict_apartments[r] = {"Кол-во комнат": qty_rooms,
+                                          "Общая площадь": total_square,
+                                          "Цена м2": price_m2,
+                                          "Стоимость": cost,
+                                          "Этаж": int(iFloor)}
+                else:
+                    temp_floors = floor.split("-")
+                    start_floor = int(temp_floors[0].strip())
+                    end_floor = int(temp_floors[1].strip())
+                    for iFloor in range(start_floor, end_floor+1):
+                        dict_apartments[r] = {"Кол-во комнат": qty_rooms,
+                                              "Общая площадь": total_square,
+                                              "Цена м2": price_m2,
+                                              "Стоимость": cost,
+                                              "Этаж": iFloor}
+                        r += 1
+                r += 1
 
     if pages is not None:
         flag = True
@@ -178,16 +192,30 @@ def parse_building(url):
                         cost = int("".join(apartment.find(class_="flat-card__price").text.split()))
 
                     if apartment.find(class_="flat-card__floor") is not None:
-                        floor = apartment.find(class_="flat-card__floor").find(class_="key-value-table__value").text
+                        floors = apartment.find(class_="flat-card__floor").find(class_="key-value-table__value").text
                     else:
-                        floor = ""
+                        floors = ""
 
-                    dict_apartments[r] = {"Кол-во комнат": qty_rooms,
-                                          "Общая площадь": total_square,
-                                          "Цена м2": price_m2,
-                                          "Стоимость": cost,
-                                          "Этаж": floor}
-                    r += 1
+                    for floor in floors.split(","):
+                        iFloor = floor.strip()
+                        if "-" not in floor:
+                            dict_apartments[r] = {"Кол-во комнат": qty_rooms,
+                                                  "Общая площадь": total_square,
+                                                  "Цена м2": price_m2,
+                                                  "Стоимость": cost,
+                                                  "Этаж": int(iFloor)}
+                        else:
+                            temp_floors = floor.split("-")
+                            start_floor = int(temp_floors[0].strip())
+                            end_floor = int(temp_floors[1].strip())
+                            for iFloor in range(start_floor, end_floor + 1):
+                                dict_apartments[r] = {"Кол-во комнат": qty_rooms,
+                                                      "Общая площадь": total_square,
+                                                      "Цена м2": price_m2,
+                                                      "Стоимость": cost,
+                                                      "Этаж": iFloor}
+                            r += 1
+                        r += 1
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
             if len(temp_page) > 1 and temp_page[1] == "disabled":
                 flag = False
@@ -196,17 +224,15 @@ def parse_building(url):
 
     return dict_apartments
 
+
 domain = "https://www.domostroydon.ru"
-cities = parse_cities()
-for city, url_city in cities.items():
-    zhks = parse_zhks(url_city["url_city"])
-    for zhk, url_zhk in zhks.items():
-        buildings = parse_buildings(url_zhk)
-        for building, url_building in buildings.items():
-            apartments = parse_building(url_building)
-            buildings[building] = apartments
-        zhks[zhk] = buildings
-    cities[city] = zhks
+cities = {}
+zhks = {}
+buildings = {}
+apartments = parse_building("https://www.domostroydon.ru/novostroyki/zhk-ekateriniskiy/dom-2a")
+buildings["Дом №2а"] = apartments
+zhks["ЖК Екатериниский"] = buildings
+cities["Ростов"] = zhks
 
 for city, city_data in cities.items():
     save_to_xlsx(city, city_data)
