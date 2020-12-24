@@ -4,21 +4,21 @@ def parse_cities():
 
     domain_cities = domain + "/novostroyki/rostovskaya-oblast/"
     cities = {}
-    # cities = {"Азов": {"url_city": "azov"},
-    #           "Волгодонск": {"url_city": "volgodonsk"},
-    #           "Новочеркасск": {"url_city": "novocherkassk"},
-    #           "Таганрог": {"url_city": "taganrog"},
-    #           "Городской округ Азов": {"url_city": "gorodskoy-okrug-azov"},
-    #           "Городской округ Батайск": {"url_city": "gorodskoy-okrug-bataysk"},
-    #           "Азовский район": {"url_city": "azovskiy-rayon"},
-    #           "Городской округ Волгодонск": {"url_city": "gorodskoy-okrug-volgodonsk"},
-    #           "Аксайский район": {"url_city": "aksayskiy-rayon"},
-    #           "Мясниковский район": {"url_city": "myasnikovskiy-rayon"},
-    #           "Багаевский район": {"url_city": "bagaevskiy-rayon"},
-    #           "Городской округ Новочеркасск": {"url_city": "gorodskoy-okrug-novocherkassk"},
-    #           "Родионово-Несветайский район": {"url_city": "rodionovo-nesvetayskiy-rayon"},
-    #           "Городской округ Таганрог": {"url_city": "gorodskoy-okrug-taganrog"}
-    #           }
+    cities = {"Азов": {"url_city": "azov"},
+              "Волгодонск": {"url_city": "volgodonsk"},
+              "Новочеркасск": {"url_city": "novocherkassk"},
+              "Таганрог": {"url_city": "taganrog"},
+              "Городской округ Азов": {"url_city": "gorodskoy-okrug-azov"},
+              "Городской округ Батайск": {"url_city": "gorodskoy-okrug-bataysk"},
+              "Азовский район": {"url_city": "azovskiy-rayon"},
+              "Городской округ Волгодонск": {"url_city": "gorodskoy-okrug-volgodonsk"},
+              "Аксайский район": {"url_city": "aksayskiy-rayon"},
+              "Мясниковский район": {"url_city": "myasnikovskiy-rayon"},
+              "Багаевский район": {"url_city": "bagaevskiy-rayon"},
+              "Городской округ Новочеркасск": {"url_city": "gorodskoy-okrug-novocherkassk"},
+              "Родионово-Несветайский район": {"url_city": "rodionovo-nesvetayskiy-rayon"},
+              "Городской округ Таганрог": {"url_city": "gorodskoy-okrug-taganrog"}
+              }
     cities_urls = {}
     cities_urls = {"Ростов": {"url_city": "https://www.domostroydon.ru/novostroyki"}}
     for city, url in cities.items():
