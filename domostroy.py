@@ -125,7 +125,7 @@ def parse_building(url):
                                           "Общая площадь": total_square,
                                           "Цена м2": price_m2,
                                           "Стоимость": cost,
-                                          "Этаж": int(iFloor)}
+                                          "Этаж": iFloor}
                 else:
                     temp_floors = floor.split("-")
                     start_floor = int(temp_floors[0].strip())
@@ -177,7 +177,7 @@ def parse_building(url):
                                                   "Общая площадь": total_square,
                                                   "Цена м2": price_m2,
                                                   "Стоимость": cost,
-                                                  "Этаж": int(iFloor)}
+                                                  "Этаж": iFloor}
                         else:
                             temp_floors = floor.split("-")
                             start_floor = int(temp_floors[0].strip())
