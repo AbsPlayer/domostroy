@@ -1,9 +1,9 @@
 import domostroy
 
-city_name = "Ростов" # город
-zhk_name = "ЖК Звёздный-2" # название ЖК
-building_name = "дом №3" # номер дома
-building_url = "https://www.domostroydon.ru/novostroyki/zhk-zhk-zvezdnyy-2/dom-3" # ссылка на ЖК
+city_name = input("Введите название города: ") # город
+zhk_name = input("Введите название ЖК: ") # название ЖК
+building_name = input("Введите номер дома: ") # номер дома
+building_url = input("Введите ссылку на дом: ") # ссылка на ЖК
 # все введенные данные будут использованы в xls-отчёте
 
 cities = {}
