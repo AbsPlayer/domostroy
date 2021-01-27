@@ -17,6 +17,6 @@ zhks[zhk_name] = buildings
 cities[city_name] = zhks
 
 for city, city_data in cities.items():
-    domostroy.save_to_xlsx(city, city_data)
+    domostroy.save_to_xlsx(city, city_data, zhk_name_manual=zhk_name)
 
 print("All done!")
