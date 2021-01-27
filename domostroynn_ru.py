@@ -28,9 +28,9 @@ def parse_cities():
 
 cities = parse_cities()
 for city, url_city in cities.items():
-    zhks = domostroy.parse_zhks(domain, url_city["url_city"])
+    zhks = domostroy.parse_zhks(url_city["url_city"])
     for zhk, url_zhk in zhks.items():
-        buildings = domostroy.parse_buildings(domain, url_zhk)
+        buildings = domostroy.parse_buildings(url_zhk)
         for building, url_building in buildings.items():
             apartments = domostroy.parse_building(url_building)
             buildings[building] = apartments
