@@ -4,9 +4,11 @@ import openpyxl
 from urllib.parse import urljoin
 
 
-def save_to_xlsx(city, dict_data):
+def save_to_xlsx(city, dict_data, zhk_name_manual=""):
 
-    filename = city + ".xlsx"
+    if zhk_name_manual != "":
+        zhk_name_manual = "_" + zhk_name_manual
+    filename = city + zhk_name_manual + ".xlsx"
     wb = openpyxl.Workbook()
     wb.save(filename)
     wb = openpyxl.load_workbook(filename)
