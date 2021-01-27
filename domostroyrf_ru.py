@@ -2,6 +2,7 @@ import domostroy
 
 def parse_cities():
 
+    domain = "https://domostroyrf.ru"
     domain_cities = domain + "/novostroyki/voronezhskaya-oblast/"
     cities = {}
     cities = {"Бобров": {"url_city": "bobrov"},
@@ -25,7 +26,7 @@ def parse_cities():
     return cities_urls
 
 
-domain = "https://domostroyrf.ru"
+
 cities = parse_cities()
 for city, url_city in cities.items():
     zhks = domostroy.parse_zhks(domain, url_city["url_city"])
