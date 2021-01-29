@@ -1,7 +1,7 @@
 import requests
 import bs4
 import openpyxl
-from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
@@ -42,8 +42,8 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
 def parse_zhks(city_url):
 
     url_zhks = {}
-    domain = urljoin(city_url, "/")
-    domain = domain[:-1]
+    up = urlparse(city_url)
+    domain = up[0] + "://" + up[1]
     resp = requests.get(city_url)
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
@@ -79,8 +79,8 @@ def parse_zhks(city_url):
 def parse_buildings(zhk_url):
 
     url_buildings = {}
-    domain = urljoin(zhk_url, "/")
-    domain = domain[:-1]
+    up = urlparse(zhk_url)
+    domain = up[0] + "://" + up[1]
     resp = requests.get(zhk_url)
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
