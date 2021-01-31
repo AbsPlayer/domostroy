@@ -41,7 +41,7 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     return
 
 
-def parse_zhks(city_url):
+def get_zhks_urls(city_url):
 
     url_zhks = {}
     up = urlparse(city_url)
@@ -85,7 +85,7 @@ def parse_zhks(city_url):
     return url_zhks
 
 
-def parse_buildings(zhk_url):
+def get_buildings_urls(zhk_url):
 
     url_buildings = {}
     up = urlparse(zhk_url)
@@ -105,7 +105,7 @@ def parse_buildings(zhk_url):
     return url_buildings
 
 
-def parse_building(url):
+def get_building_data(url):
 
     resp = requests.get(url)
     if resp.status_code == requests.codes.ok:

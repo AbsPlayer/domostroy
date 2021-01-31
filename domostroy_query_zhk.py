@@ -9,9 +9,9 @@ cities = {}
 zhks = {}
 buildings = {}
 
-buildings = domostroy.parse_buildings(url_zhk)
+buildings = domostroy.get_buildings_urls(url_zhk)
 for building, url_building in buildings.items():
-    apartments = domostroy.parse_building(url_building)
+    apartments = domostroy.get_building_data(url_building)
     buildings[building] = apartments
 zhks[zhk_name] = buildings
 cities[city_name] = zhks
