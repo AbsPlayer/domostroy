@@ -9,6 +9,8 @@ key_city = int(input("Введите номер города для парсин
 if key_city not in cities.keys():
     print("Нет такого города в списке!")
     quit()
+
+print("Processing...")
 city_name, city_url = cities[key_city]
 
 # city_url = "https://www.domostroydon.ru" # для теста
@@ -27,4 +29,5 @@ for city, url_city in cities.items():
 
 for city, city_data in cities.items():
     domostroy.save_to_xlsx(city, city_data)
+print()
 print("All done!")
