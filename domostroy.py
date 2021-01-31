@@ -6,12 +6,12 @@ from urllib.parse import urlparse, urljoin
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
 
+    if len(dict_data) == 0:
+        return
     if zhk_name_manual != "":
         zhk_name_manual = "_" + zhk_name_manual
     filename = city + zhk_name_manual + ".xlsx"
     wb = openpyxl.Workbook()
-    wb.save(filename)
-    wb = openpyxl.load_workbook(filename)
     ws = wb.active
     start_row = 1
     start_column = 1
@@ -37,6 +37,8 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
                 row_ += 1
     wb.save(filename)
+
+    return
 
 
 def parse_zhks(city_url):
