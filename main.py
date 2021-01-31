@@ -1,11 +1,14 @@
 import domostroy
 # TODO: пейджинг
-# TODO: сохранение в excel. Pandas. Если нет данных - не сохранять
+# TODO: меню выбора парсинга по ЖК и зданию. Предварительно очищая экран с основным меню
 
 cities = domostroy.get_site_urls()
 domostroy.print_cities_table(cities)
 
-key_city = int(input("Введире номер города для парсинга данных: "))
+key_city = int(input("Введите номер города для парсинга данных: "))
+if key_city not in cities.keys():
+    print("Нет такого города в списке!")
+    quit()
 city_name, city_url = cities[key_city]
 
 # city_url = "https://www.domostroydon.ru" # для теста
