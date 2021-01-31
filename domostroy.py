@@ -235,6 +235,7 @@ def get_site_urls():
 def print_cities_table(dict_cities):
     for key_city, data in dict_cities.items():
         print(key_city, "-", data[0])
+    print("Если в каком-либо городе отсутствуют дома/квартиры для продажи, то соотвествующий файл не будет создан.")
 
 
 def get_city_main_url(city_url):
