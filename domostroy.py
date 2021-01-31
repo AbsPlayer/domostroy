@@ -53,6 +53,9 @@ def parse_zhks(city_url):
             name_zhk = zhk.text
             url_zhk = domain + zhk.attrs['href']
             url_zhks[name_zhk] = url_zhk
+    else:
+        print("Сайт при считывании ЖК не отвечает!")
+        quit()
 
     if pages is not None:
         flag = True
@@ -67,6 +70,10 @@ def parse_zhks(city_url):
                     name_zhk = zhk.text
                     url_zhk = domain + zhk.attrs['href']
                     url_zhks[name_zhk] = url_zhk
+            else:
+                print("Сайт при считывании ЖК не отвечает!")
+                quit()
+
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
             if len(temp_page) > 1 and temp_page[1] == "disabled":
                 flag = False
@@ -89,6 +96,9 @@ def parse_buildings(zhk_url):
             nd = building.text
             url_building = building.next.attrs['href']
             url_buildings[nd] = domain + url_building
+    else:
+        print("Сайт при считывании зданий не отвечает!")
+        quit()
 
     return url_buildings
 
@@ -143,6 +153,9 @@ def parse_building(url):
                                               "Этаж": iFloor}
                         r += 1
                 r += 1
+    else:
+        print("Сайт при считывании здания не отвечает!")
+        quit()
 
     if pages is not None:
         flag = True
@@ -195,6 +208,10 @@ def parse_building(url):
                                                       "Этаж": iFloor}
                                 r += 1
                         r += 1
+            else:
+                print("Сайт при считывании здания не отвечает!")
+                quit()
+
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
             if len(temp_page) > 1 and temp_page[1] == "disabled":
                 flag = False
@@ -209,6 +226,7 @@ def get_site_urls():
               2: ("Воронеж", "https://domostroyrf.ru/voronezh"),
               3: ("Нижний Новгород", "https://www.domostroynn.ru"),
               }
+
     return cities
 
 
@@ -222,6 +240,10 @@ def get_city_main_url(city_url):
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
         city_main_url = soup.find('span', text='Новостройки').parent.attrs['href']
+    else:
+        print("Сайт не отвечает!")
+        quit()
+
     return city_main_url
 
 
@@ -237,6 +259,10 @@ def get_cities_names_urls(city_name, city_main_url):
             city_name = city_name[:pos]
             city_url = get_city_url(city_main_url, city_id)
             cities_urls[city_name] = {"url_city": city_url}
+    else:
+        print("Сайт при считывании списка городов не отвечает!")
+        quit()
+
     return cities_urls
 
 
@@ -245,4 +271,5 @@ def get_city_url(city_main_url, city_id):
     domain = up[0] + "://" + up[1]
     url_ = urljoin(domain, "novostroyki?DistrictSearch%5Blocality%5D="+city_id)
     city_url = requests.get(url_).url
+
     return city_url
