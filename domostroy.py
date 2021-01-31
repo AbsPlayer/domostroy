@@ -1,7 +1,7 @@
 import requests
 import bs4
 import openpyxl
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
@@ -202,3 +202,47 @@ def parse_building(url):
                 page += 1
 
     return dict_apartments
+
+
+def get_site_urls():
+    cities = {1: ("Ростов", "https://www.domostroydon.ru"),
+              2: ("Воронеж", "https://domostroyrf.ru/voronezh"),
+              3: ("Нижний Новгород", "https://www.domostroynn.ru"),
+              }
+    return cities
+
+
+def print_cities_table(dict_cities):
+    for key_city, data in dict_cities.items():
+        print(key_city, "-", data[0])
+
+
+def get_city_main_url(city_url):
+    resp = requests.get(city_url)
+    if resp.status_code == requests.codes.ok:
+        soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        city_main_url = soup.find('span', text='Новостройки').parent.attrs['href']
+    return city_main_url
+
+
+def get_cities_names_urls(city_name, city_main_url):
+    cities_urls = {city_name: {"url_city": city_main_url}}
+    resp = requests.get(city_main_url)
+    if resp.status_code == requests.codes.ok:
+        soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        for item in soup.find(id="tab-district").find_all(type="checkbox"):
+            city_id = item.attrs["value"]
+            city_name = item.next.next.text
+            pos = city_name.find(" (")
+            city_name = city_name[:pos]
+            city_url = get_city_url(city_main_url, city_id)
+            cities_urls[city_name] = {"url_city": city_url}
+    return cities_urls
+
+
+def get_city_url(city_main_url, city_id):
+    up = urlparse(city_main_url)
+    domain = up[0] + "://" + up[1]
+    url_ = urljoin(domain, "novostroyki?DistrictSearch%5Blocality%5D="+city_id)
+    city_url = requests.get(url_).url
+    return city_url
