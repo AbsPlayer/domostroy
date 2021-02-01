@@ -1,5 +1,4 @@
 import domostroy
-# TODO: пейджинг
 # TODO: меню выбора парсинга по ЖК и зданию. Предварительно очищая экран с основным меню
 
 cities = domostroy.get_site_urls()
@@ -12,9 +11,6 @@ if key_city not in cities.keys():
 
 print("Processing...")
 city_name, city_url = cities[key_city]
-
-# city_url = "https://www.domostroydon.ru" # для теста
-# city_name = "Ростов" # для теста
 city_main_url = domostroy.get_city_main_url(city_url)
 cities = domostroy.get_cities_names_urls(city_name, city_main_url)
 for city, url_city in cities.items():
