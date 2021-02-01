@@ -39,6 +39,8 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
                 row_ += 1
 
+    wb.save(filename)
+
     return
 
 
@@ -70,31 +72,6 @@ def get_zhks_urls(city_url, url_zhks={}, params={}):
 
     return url_zhks
 
-    # if pages is not None:
-    #     flag = True
-    #     page = 2
-    #     while flag:
-    #         resp = requests.get(city_url, params={"page": page})
-    #         if resp.status_code == requests.codes.ok:
-    #             soup = bs4.BeautifulSoup(resp.text, "html.parser")
-    #             pages = soup.find(class_="page-item active")
-    #             zhks = soup.find_all(class_="district-card__full-name")
-    #             for zhk in zhks:
-    #                 name_zhk = zhk.text
-    #                 url_zhk = domain + zhk.attrs['href']
-    #                 url_zhks[name_zhk] = url_zhk
-    #         else:
-    #             print("Сайт при считывании ЖК не отвечает!")
-    #             quit()
-    #
-    #         temp_page = pages.next_element.next_element.next_element.next_element.get("class")
-    #         if len(temp_page) > 1 and temp_page[1] == "disabled":
-    #             flag = False
-    #         else:
-    #             page += 1
-
-    return url_zhks
-
 
 def get_buildings_urls(zhk_url):
 
@@ -116,14 +93,13 @@ def get_buildings_urls(zhk_url):
     return url_buildings
 
 
-def get_building_data(url):
+def get_building_data(url, dict_apartments={}, params={}):
 
-    resp = requests.get(url)
+    resp = requests.get(url, params=params)
     if resp.status_code == requests.codes.ok:
+        page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
-        pages = soup.find(class_="pagination")
         apartments = soup.find_all(class_="flat-card")
-        dict_apartments = {}
         r = 1
         for apartment in apartments:
             qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
@@ -166,70 +142,17 @@ def get_building_data(url):
                                               "Этаж": iFloor}
                         r += 1
                 r += 1
+        pages = soup.find(class_="page-item active")
+        if pages is not None:
+            temp_page = pages.next_element.next_element.next_element.next_element.get("class")
+            if len(temp_page) > 1 and temp_page[1] == "disabled":
+                return dict_apartments
+            else:
+                params["page"] = page + 1
+                get_building_data(url, dict_apartments, params)
     else:
         print("Сайт при считывании здания не отвечает!")
         quit()
-
-    if pages is not None:
-        flag = True
-        page = 2
-        while flag:
-            resp = requests.get(url, params={"page": page})
-            if resp.status_code == requests.codes.ok:
-                soup = bs4.BeautifulSoup(resp.text, "html.parser")
-                pages = soup.find(class_="page-item active")
-                apartments = soup.find_all(class_="flat-card")
-                for apartment in apartments:
-                    qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
-                    total_square = float(
-                        apartment.find(class_="flat-card__common-area").find(class_="key-value-table__value").text)
-
-                    temp_m2 = apartment.find(class_="flat-card__price-per-meter").find(class_="key-value-table__value")
-                    if temp_m2 is not None:
-                        price_m2 = int("".join(temp_m2.text.split()))
-                    else:
-                        price_m2 = int("".join(apartment.find(class_="flat-card__price-per-meter").contents[0].split()))
-
-                    temp_cost = apartment.find(class_="flat-card__price").find(class_="key-value-table__value")
-                    if temp_cost is not None:
-                        cost = int("".join(temp_cost.text.split()))
-                    else:
-                        cost = int("".join(apartment.find(class_="flat-card__price").text.split()))
-
-                    if apartment.find(class_="flat-card__floor") is not None:
-                        floors = apartment.find(class_="flat-card__floor").find(class_="key-value-table__value").text
-                    else:
-                        floors = ""
-
-                    for floor in floors.split(","):
-                        iFloor = floor.strip()
-                        if "-" not in floor:
-                            dict_apartments[r] = {"Кол-во комнат": qty_rooms,
-                                                  "Общая площадь": total_square,
-                                                  "Цена м2": price_m2,
-                                                  "Стоимость": cost,
-                                                  "Этаж": iFloor}
-                        else:
-                            temp_floors = floor.split("-")
-                            start_floor = int(temp_floors[0].strip())
-                            end_floor = int(temp_floors[1].strip())
-                            for iFloor in range(start_floor, end_floor + 1):
-                                dict_apartments[r] = {"Кол-во комнат": qty_rooms,
-                                                      "Общая площадь": total_square,
-                                                      "Цена м2": price_m2,
-                                                      "Стоимость": cost,
-                                                      "Этаж": iFloor}
-                                r += 1
-                        r += 1
-            else:
-                print("Сайт при считывании здания не отвечает!")
-                quit()
-
-            temp_page = pages.next_element.next_element.next_element.next_element.get("class")
-            if len(temp_page) > 1 and temp_page[1] == "disabled":
-                flag = False
-            else:
-                page += 1
 
     return dict_apartments
 
