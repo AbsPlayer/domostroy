@@ -2,6 +2,7 @@ import requests
 import bs4
 import openpyxl
 from urllib.parse import urlparse, urljoin
+import os
 
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
@@ -11,6 +12,9 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     if zhk_name_manual != "":
         zhk_name_manual = "_" + zhk_name_manual
     filename = city + zhk_name_manual + ".xlsx"
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
+    if os.path.isfile(path):
+        os.remove(path)
     wb = openpyxl.Workbook()
     ws = wb.active
     start_row = 1
@@ -41,46 +45,56 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     return
 
 
-def get_zhks_urls(city_url):
+def get_zhks_urls(city_url, url_zhks={}, params={}):
 
-    url_zhks = {}
     up = urlparse(city_url)
     domain = up[0] + "://" + up[1]
-    resp = requests.get(city_url)
+    resp = requests.get(city_url, params=params)
     if resp.status_code == requests.codes.ok:
+        page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
-        pages = soup.find(class_="pagination")
         zhks = soup.find_all(class_="district-card__full-name")
         for zhk in zhks:
             name_zhk = zhk.text
-            url_zhk = domain + zhk.attrs['href']
+            url_zhk = urljoin(domain, zhk.attrs['href'])
             url_zhks[name_zhk] = url_zhk
+        pages = soup.find(class_="page-item active")
+        if pages is not None:
+            temp_page = pages.next_element.next_element.next_element.next_element.get("class")
+            if len(temp_page) > 1 and temp_page[1] == "disabled":
+                return url_zhks
+            else:
+                params["page"] = page + 1
+                get_zhks_urls(city_url, url_zhks, params)
+
     else:
         print("Сайт при считывании ЖК не отвечает!")
         quit()
 
-    if pages is not None:
-        flag = True
-        page = 2
-        while flag:
-            resp = requests.get(city_url, params={"page": page})
-            if resp.status_code == requests.codes.ok:
-                soup = bs4.BeautifulSoup(resp.text, "html.parser")
-                pages = soup.find(class_="page-item active")
-                zhks = soup.find_all(class_="district-card__full-name")
-                for zhk in zhks:
-                    name_zhk = zhk.text
-                    url_zhk = domain + zhk.attrs['href']
-                    url_zhks[name_zhk] = url_zhk
-            else:
-                print("Сайт при считывании ЖК не отвечает!")
-                quit()
+    return url_zhks
 
-            temp_page = pages.next_element.next_element.next_element.next_element.get("class")
-            if len(temp_page) > 1 and temp_page[1] == "disabled":
-                flag = False
-            else:
-                page += 1
+    # if pages is not None:
+    #     flag = True
+    #     page = 2
+    #     while flag:
+    #         resp = requests.get(city_url, params={"page": page})
+    #         if resp.status_code == requests.codes.ok:
+    #             soup = bs4.BeautifulSoup(resp.text, "html.parser")
+    #             pages = soup.find(class_="page-item active")
+    #             zhks = soup.find_all(class_="district-card__full-name")
+    #             for zhk in zhks:
+    #                 name_zhk = zhk.text
+    #                 url_zhk = domain + zhk.attrs['href']
+    #                 url_zhks[name_zhk] = url_zhk
+    #         else:
+    #             print("Сайт при считывании ЖК не отвечает!")
+    #             quit()
+    #
+    #         temp_page = pages.next_element.next_element.next_element.next_element.get("class")
+    #         if len(temp_page) > 1 and temp_page[1] == "disabled":
+    #             flag = False
+    #         else:
+    #             page += 1
 
     return url_zhks
 
@@ -97,7 +111,7 @@ def get_buildings_urls(zhk_url):
         for building in buildings:
             nd = building.text
             url_building = building.next.attrs['href']
-            url_buildings[nd] = domain + url_building
+            url_buildings[nd] = urljoin(domain, url_building)
     else:
         print("Сайт при считывании зданий не отвечает!")
         quit()
