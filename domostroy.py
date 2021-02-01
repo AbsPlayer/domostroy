@@ -284,9 +284,7 @@ def get_cities_names_urls(city_name, city_main_url):
 
 
 def get_city_url(city_main_url, city_id):
-    up = urlparse(city_main_url)
-    domain = up[0] + "://" + up[1]
-    url_ = urljoin(domain, "novostroyki?DistrictSearch%5Blocality%5D="+city_id)
+    url_ = urljoin(city_main_url, "?DistrictSearch%5Blocality%5D="+city_id)
     city_url = requests.get(url_).url
 
     return city_url
