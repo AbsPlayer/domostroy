@@ -1,7 +1,8 @@
 import requests
 import bs4
 import openpyxl
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
+import os
 
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
@@ -9,9 +10,10 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     if zhk_name_manual != "":
         zhk_name_manual = "_" + zhk_name_manual
     filename = city + zhk_name_manual + ".xlsx"
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
+    if os.path.isfile(path):
+        os.remove(path)
     wb = openpyxl.Workbook()
-    wb.save(filename)
-    wb = openpyxl.load_workbook(filename)
     ws = wb.active
     start_row = 1
     start_column = 1
@@ -36,47 +38,42 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
                 ws.cell(row=row_, column=start_column + 5).value = apartments[apartment]["Стоимость"]
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
                 row_ += 1
+
     wb.save(filename)
 
+    return
 
-def parse_zhks(city_url):
 
-    url_zhks = {}
+def get_zhks_urls(city_url, url_zhks={}, params={}):
+
     up = urlparse(city_url)
     domain = up[0] + "://" + up[1]
-    resp = requests.get(city_url)
+    resp = requests.get(city_url, params=params)
     if resp.status_code == requests.codes.ok:
+        page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
-        pages = soup.find(class_="pagination")
         zhks = soup.find_all(class_="district-card__full-name")
         for zhk in zhks:
             name_zhk = zhk.text
-            url_zhk = domain + zhk.attrs['href']
+            url_zhk = urljoin(domain, zhk.attrs['href'])
             url_zhks[name_zhk] = url_zhk
-
-    if pages is not None:
-        flag = True
-        page = 2
-        while flag:
-            resp = requests.get(city_url, params={"page": page})
-            if resp.status_code == requests.codes.ok:
-                soup = bs4.BeautifulSoup(resp.text, "html.parser")
-                pages = soup.find(class_="page-item active")
-                zhks = soup.find_all(class_="district-card__full-name")
-                for zhk in zhks:
-                    name_zhk = zhk.text
-                    url_zhk = domain + zhk.attrs['href']
-                    url_zhks[name_zhk] = url_zhk
+        pages = soup.find(class_="page-item active")
+        if pages is not None:
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
             if len(temp_page) > 1 and temp_page[1] == "disabled":
-                flag = False
+                return url_zhks
             else:
-                page += 1
+                params["page"] = page + 1
+                get_zhks_urls(city_url, url_zhks, params)
+
+    else:
+        print("Сайт при считывании ЖК не отвечает!")
+        quit()
 
     return url_zhks
 
 
-def parse_buildings(zhk_url):
+def get_buildings_urls(zhk_url):
 
     url_buildings = {}
     up = urlparse(zhk_url)
@@ -88,19 +85,21 @@ def parse_buildings(zhk_url):
         for building in buildings:
             nd = building.text
             url_building = building.next.attrs['href']
-            url_buildings[nd] = domain + url_building
+            url_buildings[nd] = urljoin(domain, url_building)
+    else:
+        print("Сайт при считывании зданий не отвечает!")
+        quit()
 
     return url_buildings
 
 
-def parse_building(url):
+def get_building_data(url, dict_apartments={}, params={}):
 
-    resp = requests.get(url)
+    resp = requests.get(url, params=params)
     if resp.status_code == requests.codes.ok:
+        page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
-        pages = soup.find(class_="pagination")
         apartments = soup.find_all(class_="flat-card")
-        dict_apartments = {}
         r = 1
         for apartment in apartments:
             qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
@@ -125,6 +124,8 @@ def parse_building(url):
 
             for floor in floors.split(","):
                 iFloor = floor.strip()
+                if iFloor.isdigit():
+                    iFloor = int(iFloor)
                 if "-" not in floor:
                     dict_apartments[r] = {"Кол-во комнат": qty_rooms,
                                           "Общая площадь": total_square,
@@ -143,62 +144,75 @@ def parse_building(url):
                                               "Этаж": iFloor}
                         r += 1
                 r += 1
-
-    if pages is not None:
-        flag = True
-        page = 2
-        while flag:
-            resp = requests.get(url, params={"page": page})
-            if resp.status_code == requests.codes.ok:
-                soup = bs4.BeautifulSoup(resp.text, "html.parser")
-                pages = soup.find(class_="page-item active")
-                apartments = soup.find_all(class_="flat-card")
-                for apartment in apartments:
-                    qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
-                    total_square = float(
-                        apartment.find(class_="flat-card__common-area").find(class_="key-value-table__value").text)
-
-                    temp_m2 = apartment.find(class_="flat-card__price-per-meter").find(class_="key-value-table__value")
-                    if temp_m2 is not None:
-                        price_m2 = int("".join(temp_m2.text.split()))
-                    else:
-                        price_m2 = int("".join(apartment.find(class_="flat-card__price-per-meter").contents[0].split()))
-
-                    temp_cost = apartment.find(class_="flat-card__price").find(class_="key-value-table__value")
-                    if temp_cost is not None:
-                        cost = int("".join(temp_cost.text.split()))
-                    else:
-                        cost = int("".join(apartment.find(class_="flat-card__price").text.split()))
-
-                    if apartment.find(class_="flat-card__floor") is not None:
-                        floors = apartment.find(class_="flat-card__floor").find(class_="key-value-table__value").text
-                    else:
-                        floors = ""
-
-                    for floor in floors.split(","):
-                        iFloor = floor.strip()
-                        if "-" not in floor:
-                            dict_apartments[r] = {"Кол-во комнат": qty_rooms,
-                                                  "Общая площадь": total_square,
-                                                  "Цена м2": price_m2,
-                                                  "Стоимость": cost,
-                                                  "Этаж": iFloor}
-                        else:
-                            temp_floors = floor.split("-")
-                            start_floor = int(temp_floors[0].strip())
-                            end_floor = int(temp_floors[1].strip())
-                            for iFloor in range(start_floor, end_floor + 1):
-                                dict_apartments[r] = {"Кол-во комнат": qty_rooms,
-                                                      "Общая площадь": total_square,
-                                                      "Цена м2": price_m2,
-                                                      "Стоимость": cost,
-                                                      "Этаж": iFloor}
-                                r += 1
-                        r += 1
+        pages = soup.find(class_="page-item active")
+        if pages is not None:
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
             if len(temp_page) > 1 and temp_page[1] == "disabled":
-                flag = False
+                return dict_apartments
             else:
-                page += 1
+                params["page"] = page + 1
+                get_building_data(url, dict_apartments, params)
+    else:
+        print("Сайт при считывании здания не отвечает!")
+        quit()
 
     return dict_apartments
+
+
+def get_site_urls():
+
+    cities = {1: ("Ростов", "https://www.domostroydon.ru"),
+              2: ("Воронеж", "https://domostroyrf.ru/voronezh"),
+              3: ("Нижний Новгород", "https://www.domostroynn.ru"),
+              }
+
+    return cities
+
+
+def print_cities_table(dict_cities):
+
+    for key_city, data in dict_cities.items():
+        print(key_city, "-", data[0])
+
+    return
+
+
+def get_city_main_url(city_url):
+
+    resp = requests.get(city_url)
+    if resp.status_code == requests.codes.ok:
+        soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        city_main_url = soup.find('span', text='Новостройки').parent.attrs['href']
+    else:
+        print("Сайт не отвечает!")
+        quit()
+
+    return city_main_url
+
+
+def get_cities_names_urls(city_name, city_main_url):
+
+    cities_urls = {city_name: {"url_city": city_main_url}}
+    resp = requests.get(city_main_url)
+    if resp.status_code == requests.codes.ok:
+        soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        for item in soup.find(id="tab-district").find_all(type="checkbox"):
+            city_id = item.attrs["value"]
+            city_name = item.next.next.text
+            pos = city_name.find(" (")
+            city_name = city_name[:pos]
+            city_url = get_city_url(city_main_url, city_id)
+            cities_urls[city_name] = {"url_city": city_url}
+    else:
+        print("Сайт при считывании списка городов не отвечает!")
+        quit()
+
+    return cities_urls
+
+
+def get_city_url(city_main_url, city_id):
+
+    url_ = urljoin(city_main_url, "?DistrictSearch%5Blocality%5D="+city_id)
+    city_url = requests.get(url_).url
+
+    return city_url
