@@ -124,6 +124,8 @@ def get_building_data(url, dict_apartments={}, params={}):
 
             for floor in floors.split(","):
                 iFloor = floor.strip()
+                if iFloor.isdigit():
+                    iFloor = int(iFloor)
                 if "-" not in floor:
                     dict_apartments[r] = {"Кол-во комнат": qty_rooms,
                                           "Общая площадь": total_square,
@@ -158,6 +160,7 @@ def get_building_data(url, dict_apartments={}, params={}):
 
 
 def get_site_urls():
+
     cities = {1: ("Ростов", "https://www.domostroydon.ru"),
               2: ("Воронеж", "https://domostroyrf.ru/voronezh"),
               3: ("Нижний Новгород", "https://www.domostroynn.ru"),
@@ -167,11 +170,15 @@ def get_site_urls():
 
 
 def print_cities_table(dict_cities):
+
     for key_city, data in dict_cities.items():
         print(key_city, "-", data[0])
 
+    return
+
 
 def get_city_main_url(city_url):
+
     resp = requests.get(city_url)
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
@@ -184,6 +191,7 @@ def get_city_main_url(city_url):
 
 
 def get_cities_names_urls(city_name, city_main_url):
+
     cities_urls = {city_name: {"url_city": city_main_url}}
     resp = requests.get(city_main_url)
     if resp.status_code == requests.codes.ok:
@@ -203,6 +211,7 @@ def get_cities_names_urls(city_name, city_main_url):
 
 
 def get_city_url(city_main_url, city_id):
+
     url_ = urljoin(city_main_url, "?DistrictSearch%5Blocality%5D="+city_id)
     city_url = requests.get(url_).url
 
