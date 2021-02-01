@@ -7,8 +7,6 @@ import os
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
 
-    if len(dict_data) == 0:
-        return
     if zhk_name_manual != "":
         zhk_name_manual = "_" + zhk_name_manual
     filename = city + zhk_name_manual + ".xlsx"
@@ -40,7 +38,6 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
                 ws.cell(row=row_, column=start_column + 5).value = apartments[apartment]["Стоимость"]
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
                 row_ += 1
-    wb.save(filename)
 
     return
 
@@ -249,7 +246,6 @@ def get_site_urls():
 def print_cities_table(dict_cities):
     for key_city, data in dict_cities.items():
         print(key_city, "-", data[0])
-    print("Если в каком-либо городе отсутствуют дома/квартиры для продажи, то соотвествующий файл не будет создан.")
 
 
 def get_city_main_url(city_url):
