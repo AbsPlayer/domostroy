@@ -93,14 +93,13 @@ def get_buildings_urls(zhk_url):
     return url_buildings
 
 
-def get_building_data(url, dict_apartments={}, params={}):
+def get_building_data(url, dict_apartments={}, params={}, aptmt=1):
 
     resp = requests.get(url, params=params)
     if resp.status_code == requests.codes.ok:
         page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
         apartments = soup.find_all(class_="flat-card")
-        r = 1
         for apartment in apartments:
             qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
             total_square = float(
@@ -127,7 +126,7 @@ def get_building_data(url, dict_apartments={}, params={}):
                 if iFloor.isdigit():
                     iFloor = int(iFloor)
                 if "-" not in floor:
-                    dict_apartments[r] = {"Кол-во комнат": qty_rooms,
+                    dict_apartments[aptmt] = {"Кол-во комнат": qty_rooms,
                                           "Общая площадь": total_square,
                                           "Цена м2": price_m2,
                                           "Стоимость": cost,
@@ -137,13 +136,13 @@ def get_building_data(url, dict_apartments={}, params={}):
                     start_floor = int(temp_floors[0].strip())
                     end_floor = int(temp_floors[1].strip())
                     for iFloor in range(start_floor, end_floor+1):
-                        dict_apartments[r] = {"Кол-во комнат": qty_rooms,
+                        dict_apartments[aptmt] = {"Кол-во комнат": qty_rooms,
                                               "Общая площадь": total_square,
                                               "Цена м2": price_m2,
                                               "Стоимость": cost,
                                               "Этаж": iFloor}
-                        r += 1
-                r += 1
+                        aptmt += 1
+                aptmt += 1
         pages = soup.find(class_="page-item active")
         if pages is not None:
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
@@ -151,7 +150,7 @@ def get_building_data(url, dict_apartments={}, params={}):
                 return dict_apartments
             else:
                 params["page"] = page + 1
-                get_building_data(url, dict_apartments, params)
+                get_building_data(url, dict_apartments, params, aptmt)
     else:
         print("Сайт при считывании здания не отвечает!")
         quit()
@@ -173,7 +172,8 @@ def print_cities_table(dict_cities):
 
     for key_city, data in dict_cities.items():
         print(key_city, "-", data[0])
-
+    print("101 - парсинг ЖК")
+    print("102 - парсинг дома")
     return
 
 
