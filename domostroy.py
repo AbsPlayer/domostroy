@@ -93,8 +93,9 @@ def get_buildings_urls(zhk_url):
     return url_buildings
 
 
-def get_building_data(url, dict_apartments={}, params={}, aptmt=1):
+def get_building_data(url, dict_apartments={}, params={}):
 
+    aptmt = len(dict_apartments) + 1
     resp = requests.get(url, params=params)
     if resp.status_code == requests.codes.ok:
         page = params.get("page", 1)
@@ -150,7 +151,7 @@ def get_building_data(url, dict_apartments={}, params={}, aptmt=1):
                 return dict_apartments
             else:
                 params["page"] = page + 1
-                get_building_data(url, dict_apartments, params, aptmt)
+                get_building_data(url, dict_apartments, params)
     else:
         print("Сайт при считывании здания не отвечает!")
         quit()
