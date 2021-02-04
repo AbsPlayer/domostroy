@@ -1,9 +1,9 @@
-Parser of real estate sites of the Russian Federation.
+Parser of real estate sites of the Russian Federation. Using the Beautyful Soup library.
 The domostroy.py file in the get_site_urls function contains a list of urls by which data parsing is possible.
 Any site on the domostroyrf.ru platform can be parsed by this parser.
 It is enough to expand the dictionary of urls in the domostroy.py file in the get_site_urls function
 *******************
-Парсер сайтов недвижимости рф.
+Парсер сайтов недвижимости рф. C использованием библиотеки Beautyful Soup.
 В файле domostroy.py в функции get_site_urls содержится перечень урлов, по которым возможен парс данных.
 Любой сайт на платформе domostroyrf.ru может быть спаршен данным парсером.
 Достаточно расширить словарь урлов в файле domostroy.py в функции get_site_urls
