@@ -123,25 +123,25 @@ def get_building_data(url, dict_apartments={}, params={}):
                 floors = ""
 
             for floor in floors.split(","):
-                iFloor = floor.strip()
-                if iFloor.isdigit():
-                    iFloor = int(iFloor)
+                ifloor = floor.strip()
+                if ifloor.isdigit():
+                    ifloor = int(ifloor)
                 if "-" not in floor:
                     dict_apartments[aptmt] = {"Кол-во комнат": qty_rooms,
-                                          "Общая площадь": total_square,
-                                          "Цена м2": price_m2,
-                                          "Стоимость": cost,
-                                          "Этаж": iFloor}
+                                              "Общая площадь": total_square,
+                                              "Цена м2": price_m2,
+                                              "Стоимость": cost,
+                                              "Этаж": ifloor}
                 else:
                     temp_floors = floor.split("-")
                     start_floor = int(temp_floors[0].strip())
                     end_floor = int(temp_floors[1].strip())
-                    for iFloor in range(start_floor, end_floor+1):
+                    for ifloor in range(start_floor, end_floor+1):
                         dict_apartments[aptmt] = {"Кол-во комнат": qty_rooms,
-                                              "Общая площадь": total_square,
-                                              "Цена м2": price_m2,
-                                              "Стоимость": cost,
-                                              "Этаж": iFloor}
+                                                  "Общая площадь": total_square,
+                                                  "Цена м2": price_m2,
+                                                  "Стоимость": cost,
+                                                  "Этаж": ifloor}
                         aptmt += 1
                 aptmt += 1
         pages = soup.find(class_="page-item active")
@@ -180,6 +180,7 @@ def print_cities_table(dict_cities):
 
 def get_city_main_url(city_url):
 
+    city_main_url = ""
     resp = requests.get(city_url)
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
