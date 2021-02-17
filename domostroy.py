@@ -95,7 +95,6 @@ def get_buildings_urls(zhk_url):
 
 def get_building_data(url, dict_apartments={}, params={}):
 
-    aptmt = len(dict_apartments) + 1
     resp = requests.get(url, params=params)
     if resp.status_code == requests.codes.ok:
         page = params.get("page", 1)
@@ -127,6 +126,7 @@ def get_building_data(url, dict_apartments={}, params={}):
                 if ifloor.isdigit():
                     ifloor = int(ifloor)
                 if "-" not in floor:
+                    aptmt = len(dict_apartments) + 1
                     dict_apartments[aptmt] = {"Кол-во комнат": qty_rooms,
                                               "Общая площадь": total_square,
                                               "Цена м2": price_m2,
@@ -137,13 +137,13 @@ def get_building_data(url, dict_apartments={}, params={}):
                     start_floor = int(temp_floors[0].strip())
                     end_floor = int(temp_floors[1].strip())
                     for ifloor in range(start_floor, end_floor+1):
+                        aptmt = len(dict_apartments) + 1
                         dict_apartments[aptmt] = {"Кол-во комнат": qty_rooms,
                                                   "Общая площадь": total_square,
                                                   "Цена м2": price_m2,
                                                   "Стоимость": cost,
                                                   "Этаж": ifloor}
-                        aptmt += 1
-                aptmt += 1
+
         pages = soup.find(class_="page-item active")
         if pages is not None:
             temp_page = pages.next_element.next_element.next_element.next_element.get("class")
