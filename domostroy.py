@@ -25,6 +25,7 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     ws.cell(row=start_row, column=start_column + 4).value = "Цена м2"
     ws.cell(row=start_row, column=start_column + 5).value = "Цена за квартиру"
     ws.cell(row=start_row, column=start_column + 6).value = "Этаж"
+    ws.cell(row=start_row, column=start_column + 7).value = "Дата публикации"
 
     row_ = start_row + 1
     for zhk_name, buildings in dict_data.items():
@@ -37,6 +38,7 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
                 ws.cell(row=row_, column=start_column + 4).value = apartments[apartment]["Цена м2"]
                 ws.cell(row=row_, column=start_column + 5).value = apartments[apartment]["Стоимость"]
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
+                ws.cell(row=row_, column=start_column + 7).value = apartments[apartment]["Дата публикации"]
                 row_ += 1
 
     wb.save(filename)
@@ -99,6 +101,7 @@ def get_building_data(url, dict_apartments={}, params={}):
     if resp.status_code == requests.codes.ok:
         page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        date_publishing = soup.find(class_="price_updated").text
         apartments = soup.find_all(class_="flat-card")
         for apartment in apartments:
             qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
@@ -131,7 +134,8 @@ def get_building_data(url, dict_apartments={}, params={}):
                                               "Общая площадь": total_square,
                                               "Цена м2": price_m2,
                                               "Стоимость": cost,
-                                              "Этаж": ifloor}
+                                              "Этаж": ifloor,
+                                              "Дата публикации": date_publishing}
                 else:
                     temp_floors = floor.split("-")
                     start_floor = int(temp_floors[0].strip())
@@ -142,7 +146,8 @@ def get_building_data(url, dict_apartments={}, params={}):
                                                   "Общая площадь": total_square,
                                                   "Цена м2": price_m2,
                                                   "Стоимость": cost,
-                                                  "Этаж": ifloor}
+                                                  "Этаж": ifloor,
+                                                  "Дата публикации": date_publishing}
 
         pages = soup.find(class_="page-item active")
         if pages is not None:
