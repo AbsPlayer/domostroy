@@ -12,9 +12,9 @@ def query_building():
     urls = [i[1] for i in cities.values()]
     up = urlparse(building_url)
     url_ = up[0] + "://" + up[1]
-    if url_ not in urls:
-        print(msg)
-        quit()
+    # if url_ not in urls:
+    #     print(msg)
+    #     quit()
 
     # все введенные данные будут использованы в xls-отчёте
 

@@ -25,6 +25,7 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     ws.cell(row=start_row, column=start_column + 4).value = "Цена м2"
     ws.cell(row=start_row, column=start_column + 5).value = "Цена за квартиру"
     ws.cell(row=start_row, column=start_column + 6).value = "Этаж"
+    ws.cell(row=start_row, column=start_column + 7).value = "Дата публикации"
 
     row_ = start_row + 1
     for zhk_name, buildings in dict_data.items():
@@ -37,11 +38,184 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
                 ws.cell(row=row_, column=start_column + 4).value = apartments[apartment]["Цена м2"]
                 ws.cell(row=row_, column=start_column + 5).value = apartments[apartment]["Стоимость"]
                 ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
+                ws.cell(row=row_, column=start_column + 7).value = apartments[apartment]["Дата публикации"]
                 row_ += 1
 
+    wb = create_sheets_maxmin(wb, zhk_name_manual, dict_data)
     wb.save(filename)
 
     return
+
+
+def get_min_data(dictData, param, key, value):
+    lst = []
+    try:
+        for aptmts in dictData.values():
+            for aptmt in aptmts.values():
+                if aptmt[key] == value:
+                    lst.append(aptmt[param])
+        min_value = min(lst)
+    except:
+        min_value = ""
+    return min_value
+
+
+def get_max_data(dictData, param, key, value):
+    lst = []
+    try:
+        for aptmts in dictData.values():
+            for aptmt in aptmts.values():
+                if aptmt[key] == value:
+                    lst.append(aptmt[param])
+        max_value = max(lst)
+    except:
+        max_value = ""
+    return max_value
+
+
+def create_sheets_maxmin(wb, name, dict_data):
+    sh_maxmin = wb.create_sheet()
+    headres = [
+        "name",
+        "min_price_room0",
+        "min_price_room1",
+        "min_price_room2",
+        "min_price_room3",
+        "min_price_room4",
+        "",
+        "max_price_room0",
+        "max_price_room1",
+        "max_price_room2",
+        "max_price_room3",
+        "max_price_room4",
+        "",
+        "min_area_room0",
+        "min_area_room1",
+        "min_area_room2",
+        "min_area_room3",
+        "min_area_room4",
+        "",
+        "max_area_room0",
+        "max_area_room1",
+        "max_area_room2",
+        "max_area_room3",
+        "max_area_room4",
+        "",
+        "min_price_area_room0",
+        "min_price_area_room1",
+        "min_price_area_room2",
+        "min_price_area_room3",
+        "min_price_area_room4",
+        "",
+        "max_price_area_room0",
+        "max_price_area_room1",
+        "max_price_area_room2",
+        "max_price_area_room3",
+        "max_price_area_room4"
+    ]
+    for index, header in enumerate(headres):
+        sh_maxmin.cell(row=1, column=index + 1).value = header
+
+    row_ = 2
+    for zhk_name, buildings in dict_data.items():
+        sh_maxmin.cell(row=row_, column=1).value = zhk_name
+
+        min_value = get_min_data(buildings, "Стоимость", "Кол-во комнат", "C")
+        sh_maxmin.cell(row=row_, column=2).value = min_value
+
+        min_value = get_min_data(buildings, "Стоимость", "Кол-во комнат", "1")
+        sh_maxmin.cell(row=row_, column=3).value = min_value
+
+        min_value = get_min_data(buildings, "Стоимость", "Кол-во комнат", "2")
+        sh_maxmin.cell(row=row_, column=4).value = min_value
+
+        min_value = get_min_data(buildings, "Стоимость", "Кол-во комнат", "3")
+        sh_maxmin.cell(row=row_, column=5).value = min_value
+
+        min_value = get_min_data(buildings, "Стоимость", "Кол-во комнат", "4")
+        sh_maxmin.cell(row=row_, column=6).value = min_value
+
+        max_value = get_max_data(buildings, "Стоимость", "Кол-во комнат", "С")
+        sh_maxmin.cell(row=row_, column=8).value = max_value
+
+        max_value = get_max_data(buildings, "Стоимость", "Кол-во комнат", "1")
+        sh_maxmin.cell(row=row_, column=9).value = max_value
+
+        max_value = get_max_data(buildings, "Стоимость", "Кол-во комнат", "2")
+        sh_maxmin.cell(row=row_, column=10).value = max_value
+
+        max_value = get_max_data(buildings, "Стоимость", "Кол-во комнат", "3")
+        sh_maxmin.cell(row=row_, column=11).value = max_value
+
+        max_value = get_max_data(buildings, "Стоимость", "Кол-во комнат", "4")
+        sh_maxmin.cell(row=row_, column=12).value = max_value
+
+
+        min_value = get_min_data(buildings, "Общая площадь", "Кол-во комнат", "С")
+        sh_maxmin.cell(row=row_, column=14).value = min_value
+
+        min_value = get_min_data(buildings, "Общая площадь", "Кол-во комнат", "1")
+        sh_maxmin.cell(row=row_, column=15).value = min_value
+
+        min_value = get_min_data(buildings, "Общая площадь", "Кол-во комнат", "2")
+        sh_maxmin.cell(row=row_, column=16).value = min_value
+
+        min_value = get_min_data(buildings, "Общая площадь", "Кол-во комнат", "3")
+        sh_maxmin.cell(row=row_, column=17).value = min_value
+
+        min_value = get_min_data(buildings, "Общая площадь", "Кол-во комнат", "4")
+        sh_maxmin.cell(row=row_, column=18).value = min_value
+
+        max_value = get_max_data(buildings, "Общая площадь", "Кол-во комнат", "С")
+        sh_maxmin.cell(row=row_, column=20).value = max_value
+
+        max_value = get_max_data(buildings, "Общая площадь", "Кол-во комнат", "1")
+        sh_maxmin.cell(row=row_, column=21).value = max_value
+
+        max_value = get_max_data(buildings, "Общая площадь", "Кол-во комнат", "2")
+        sh_maxmin.cell(row=row_, column=22).value = max_value
+
+        max_value = get_max_data(buildings, "Общая площадь", "Кол-во комнат", "3")
+        sh_maxmin.cell(row=row_, column=23).value = max_value
+
+        max_value = get_max_data(buildings, "Общая площадь", "Кол-во комнат", "4")
+        sh_maxmin.cell(row=row_, column=24).value = max_value
+
+
+        min_value = get_min_data(buildings, "Цена м2", "Кол-во комнат", "С")
+        sh_maxmin.cell(row=row_, column=26).value = min_value
+
+        min_value = get_min_data(buildings, "Цена м2", "Кол-во комнат", "1")
+        sh_maxmin.cell(row=row_, column=27).value = min_value
+
+        min_value = get_min_data(buildings, "Цена м2", "Кол-во комнат", "2")
+        sh_maxmin.cell(row=row_, column=28).value = min_value
+
+        min_value = get_min_data(buildings, "Цена м2", "Кол-во комнат", "3")
+        sh_maxmin.cell(row=row_, column=29).value = min_value
+
+        min_value = get_min_data(buildings, "Цена м2", "Кол-во комнат", "4")
+        sh_maxmin.cell(row=row_, column=30).value = min_value
+
+        max_value = get_max_data(buildings, "Цена м2", "Кол-во комнат", "С")
+        sh_maxmin.cell(row=row_, column=32).value = max_value
+
+        max_value = get_max_data(buildings, "Цена м2", "Кол-во комнат", "1")
+        sh_maxmin.cell(row=row_, column=33).value = max_value
+
+        max_value = get_max_data(buildings, "Цена м2", "Кол-во комнат", "2")
+        sh_maxmin.cell(row=row_, column=34).value = max_value
+
+        max_value = get_max_data(buildings, "Цена м2", "Кол-во комнат", "3")
+        sh_maxmin.cell(row=row_, column=35).value = max_value
+
+        max_value = get_max_data(buildings, "Цена м2", "Кол-во комнат", "4")
+        sh_maxmin.cell(row=row_, column=36).value = max_value
+
+
+        row_ += 1
+
+    return wb
 
 
 def get_zhks_urls(city_url, url_zhks={}, params={}):
@@ -99,6 +273,10 @@ def get_building_data(url, dict_apartments={}, params={}):
     if resp.status_code == requests.codes.ok:
         page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        if soup.find(class_="price_updated") is not None:
+            date_publishing = soup.find(class_="price_updated").text
+        else:
+            date_publishing = ""
         apartments = soup.find_all(class_="flat-card")
         for apartment in apartments:
             qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
@@ -131,7 +309,8 @@ def get_building_data(url, dict_apartments={}, params={}):
                                               "Общая площадь": total_square,
                                               "Цена м2": price_m2,
                                               "Стоимость": cost,
-                                              "Этаж": ifloor}
+                                              "Этаж": ifloor,
+                                              "Дата публикации": date_publishing}
                 else:
                     temp_floors = floor.split("-")
                     start_floor = int(temp_floors[0].strip())
@@ -142,7 +321,8 @@ def get_building_data(url, dict_apartments={}, params={}):
                                                   "Общая площадь": total_square,
                                                   "Цена м2": price_m2,
                                                   "Стоимость": cost,
-                                                  "Этаж": ifloor}
+                                                  "Этаж": ifloor,
+                                                  "Дата публикации": date_publishing}
 
         pages = soup.find(class_="page-item active")
         if pages is not None:

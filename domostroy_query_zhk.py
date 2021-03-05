@@ -12,9 +12,9 @@ def query_zhk():
     urls = [i[1] for i in cities.values()]
     up = urlparse(url_zhk)
     url_ = up[0] + "://" + up[1]
-    if url_ not in urls:
-        print(msg)
-        quit()
+    # if url_ not in urls:
+    #     print(msg)
+    #     quit()
 
     cities = {}
     zhks = {}
