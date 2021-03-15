@@ -23,7 +23,7 @@ def query_building():
     buildings = {}
     print("Processing...")
     apartments = domostroy.get_building_data(building_url, dict_apartments={}, params={})
-    buildings[building_name] = apartments
+    buildings[building_name] = {"apartments": apartments}
     zhks[zhk_name] = buildings
     cities[city_name] = zhks
 

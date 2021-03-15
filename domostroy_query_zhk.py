@@ -21,9 +21,9 @@ def query_zhk():
     buildings = {}
     print("Processing...")
     buildings = domostroy.get_buildings_urls(url_zhk)
-    for building, url_building in buildings.items():
-        apartments = domostroy.get_building_data(url_building, dict_apartments={}, params={})
-        buildings[building] = apartments
+    for building, data_building in buildings.items():
+        apartments = domostroy.get_building_data(data_building["url"], dict_apartments={}, params={})
+        buildings[building].update({"apartments": apartments})
     zhks[zhk_name] = buildings
     cities[city_name] = zhks
 
