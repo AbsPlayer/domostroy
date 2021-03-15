@@ -3,6 +3,7 @@ import bs4
 import openpyxl
 from urllib.parse import urlparse, urljoin
 import os
+import re
 
 
 def save_to_xlsx(city, dict_data, zhk_name_manual=""):
@@ -25,20 +26,18 @@ def save_to_xlsx(city, dict_data, zhk_name_manual=""):
     ws.cell(row=start_row, column=start_column + 4).value = "Цена м2"
     ws.cell(row=start_row, column=start_column + 5).value = "Цена за квартиру"
     ws.cell(row=start_row, column=start_column + 6).value = "Этаж"
-    ws.cell(row=start_row, column=start_column + 7).value = "Дата публикации"
 
     row_ = start_row + 1
     for zhk_name, buildings in dict_data.items():
-        for building_name, apartments in buildings.items():
-            for apartment in apartments:
+        for building_name, building_data in buildings.items():
+            for apartment in building_data["apartments"]:
                 ws.cell(row=row_, column=start_column + 0).value = zhk_name
                 ws.cell(row=row_, column=start_column + 1).value = building_name
-                ws.cell(row=row_, column=start_column + 2).value = apartments[apartment]["Кол-во комнат"]
-                ws.cell(row=row_, column=start_column + 3).value = apartments[apartment]["Общая площадь"]
-                ws.cell(row=row_, column=start_column + 4).value = apartments[apartment]["Цена м2"]
-                ws.cell(row=row_, column=start_column + 5).value = apartments[apartment]["Стоимость"]
-                ws.cell(row=row_, column=start_column + 6).value = apartments[apartment]["Этаж"]
-                ws.cell(row=row_, column=start_column + 7).value = apartments[apartment]["Дата публикации"]
+                ws.cell(row=row_, column=start_column + 2).value = building_data["apartments"][apartment]["Кол-во комнат"]
+                ws.cell(row=row_, column=start_column + 3).value = building_data["apartments"][apartment]["Общая площадь"]
+                ws.cell(row=row_, column=start_column + 4).value = building_data["apartments"][apartment]["Цена м2"]
+                ws.cell(row=row_, column=start_column + 5).value = building_data["apartments"][apartment]["Стоимость"]
+                ws.cell(row=row_, column=start_column + 6).value = building_data["apartments"][apartment]["Этаж"]
                 row_ += 1
 
     wb = create_sheets_maxmin(wb, zhk_name_manual, dict_data)
@@ -51,7 +50,7 @@ def get_min_data(dictData, param, key, value):
     lst = []
     try:
         for aptmts in dictData.values():
-            for aptmt in aptmts.values():
+            for aptmt in aptmts["apartments"].values():
                 if aptmt[key] == value:
                     lst.append(aptmt[param])
         min_value = min(lst)
@@ -64,7 +63,7 @@ def get_max_data(dictData, param, key, value):
     lst = []
     try:
         for aptmts in dictData.values():
-            for aptmt in aptmts.values():
+            for aptmt in aptmts["apartments"].values():
                 if aptmt[key] == value:
                     lst.append(aptmt[param])
         max_value = max(lst)
@@ -112,6 +111,8 @@ def create_sheets_maxmin(wb, name, dict_data):
         "max_price_area_room2",
         "max_price_area_room3",
         "max_price_area_room4"
+        "",
+        "published_at"
     ]
     for index, header in enumerate(headres):
         sh_maxmin.cell(row=1, column=index + 1).value = header
@@ -212,6 +213,12 @@ def create_sheets_maxmin(wb, name, dict_data):
         max_value = get_max_data(buildings, "Цена м2", "Кол-во комнат", "4")
         sh_maxmin.cell(row=row_, column=36).value = max_value
 
+        try:
+            sh_maxmin.cell(row=row_, column=37).value = list(buildings.values())[0]["Дата публикации"]
+        except:
+            # sh_maxmin.cell(row=row_, column=37).value = list(
+            #     list(buildings.values())[0]["apartments"].values())[0]["Дата публикации"]
+            sh_maxmin.cell(row=row_, column=37).value = ""
 
         row_ += 1
 
@@ -255,11 +262,18 @@ def get_buildings_urls(zhk_url):
     resp = requests.get(zhk_url)
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
+        if soup.find(class_="price_updated") is not None:
+            date_publishing = soup.find(class_="price_updated").text
+            date_publishing = re.search(r"\d\d\.\d\d\.\d\d\d\d", date_publishing).group(0)
+        else:
+            date_publishing = ""
         buildings = soup.find_all(class_="filter-table__column house-selling-item__number")
         for building in buildings:
             nd = building.text
             url_building = building.next.attrs['href']
-            url_buildings[nd] = urljoin(domain, url_building)
+            url_buildings[nd] = {"url": urljoin(domain, url_building),
+                                 "Дата публикации": date_publishing
+                                 }
     else:
         print("Сайт при считывании зданий не отвечает!")
         quit()
@@ -275,6 +289,7 @@ def get_building_data(url, dict_apartments={}, params={}):
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
         if soup.find(class_="price_updated") is not None:
             date_publishing = soup.find(class_="price_updated").text
+            date_publishing = re.search(r"\d\d\.\d\d\.\d\d\d\d", date_publishing).group(0)
         else:
             date_publishing = ""
         apartments = soup.find_all(class_="flat-card")

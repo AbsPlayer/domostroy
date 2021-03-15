@@ -23,9 +23,9 @@ if key_city in cities.keys():
         zhks = domostroy.get_zhks_urls(url_city["url_city"], url_zhks={}, params={})
         for zhk, url_zhk in zhks.items():
             buildings = domostroy.get_buildings_urls(url_zhk)
-            for building, url_building in buildings.items():
-                apartments = domostroy.get_building_data(url_building, dict_apartments={}, params={})
-                buildings[building] = apartments
+            for building, data_building in buildings.items():
+                apartments = domostroy.get_building_data(data_building["url"], dict_apartments={}, params={})
+                buildings[building].update({"apartments": apartments})
             zhks[zhk] = buildings
         cities[city] = zhks
 
