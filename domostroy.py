@@ -214,11 +214,17 @@ def create_sheets_maxmin(wb, name, dict_data):
         sh_maxmin.cell(row=row_, column=36).value = max_value
 
         try:
-            sh_maxmin.cell(row=row_, column=37).value = list(buildings.values())[0]["Дата публикации"]
+            dp = list(buildings.values())[0]["Дата публикации"]
         except:
-            # sh_maxmin.cell(row=row_, column=37).value = list(
-            #     list(buildings.values())[0]["apartments"].values())[0]["Дата публикации"]
-            sh_maxmin.cell(row=row_, column=37).value = ""
+            dp = ""
+
+        try:
+            if dp == "":
+                dp = list(list(buildings.values())[0]["apartments"].values())[0]["Дата публикации"]
+        except:
+            dp = ""
+
+        sh_maxmin.cell(row=row_, column=37).value = dp
 
         row_ += 1
 
