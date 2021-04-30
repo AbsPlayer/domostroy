@@ -74,7 +74,7 @@ def get_max_data(dictData, param, key, value):
 
 def create_sheets_maxmin(wb, name, dict_data):
     sh_maxmin = wb.create_sheet()
-    headres = [
+    headers = [
         "name",
         "min_price_room0",
         "min_price_room1",
@@ -114,7 +114,7 @@ def create_sheets_maxmin(wb, name, dict_data):
         "",
         "published_at"
     ]
-    for index, header in enumerate(headres):
+    for index, header in enumerate(headers):
         sh_maxmin.cell(row=1, column=index + 1).value = header
 
     row_ = 2
@@ -260,6 +260,13 @@ def get_zhks_urls(city_url, url_zhks={}, params={}):
     return url_zhks
 
 
+def get_date_publishing(soup):
+    if soup.find(class_="price_updated") is not None:
+        date_publishing = soup.find(class_="price_updated").text
+        date_publishing = re.search(r"\d\d\.\d\d\.\d\d\d\d", date_publishing).group(0)
+    return date_publishing
+
+
 def get_buildings_urls(zhk_url):
 
     url_buildings = {}
@@ -268,12 +275,13 @@ def get_buildings_urls(zhk_url):
     resp = requests.get(zhk_url)
     if resp.status_code == requests.codes.ok:
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
-        if soup.find(class_="price_updated") is not None:
-            date_publishing = soup.find(class_="price_updated").text
-            date_publishing = re.search(r"\d\d\.\d\d\.\d\d\d\d", date_publishing).group(0)
-        else:
-            date_publishing = ""
+        date_publishing = get_date_publishing(soup)
         buildings = soup.find_all(class_="filter-table__column house-selling-item__number")
+        if len(buildings) == 0:
+            url_buildings["№ 1"] = {
+                "url": zhk_url,
+                "Дата публикации": date_publishing
+            }
         for building in buildings:
             nd = building.text
             url_building = building.next.attrs['href']
@@ -293,11 +301,7 @@ def get_building_data(url, dict_apartments={}, params={}):
     if resp.status_code == requests.codes.ok:
         page = params.get("page", 1)
         soup = bs4.BeautifulSoup(resp.text, "html.parser")
-        if soup.find(class_="price_updated") is not None:
-            date_publishing = soup.find(class_="price_updated").text
-            date_publishing = re.search(r"\d\d\.\d\d\.\d\d\d\d", date_publishing).group(0)
-        else:
-            date_publishing = ""
+        date_publishing = get_date_publishing(soup)
         apartments = soup.find_all(class_="flat-card")
         for apartment in apartments:
             qty_rooms = apartment.find(class_="flat-card__title-link").text[0]
